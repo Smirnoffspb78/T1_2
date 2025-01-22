@@ -7,6 +7,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,9 +15,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.jpa.domain.AbstractPersistable;
+import ru.t1.java.demo.model.enums.AccountStatus;
 import ru.t1.java.demo.model.enums.AccountType;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static jakarta.persistence.EnumType.STRING;
 import static lombok.AccessLevel.PRIVATE;
@@ -26,6 +29,8 @@ import static lombok.AccessLevel.PRIVATE;
  * <p>{@link #client} - клиент банка</p>
  * <p>{@link #accountType} - тип банковского счета</p>
  * <p>{@link #balance} - баланс банковского счета</p>
+ * <p>{@link #accountId} - уникальный идентификатор</p>
+ * <p>{@link #frozenAmount} - замороженная сумма</p>
  */
 @Entity
 @Getter
@@ -50,4 +55,18 @@ public class Account extends AbstractPersistable<Long> {
     @PositiveOrZero
     @Column(name = "balance")
     private BigDecimal balance;
+
+    @NotNull
+    @Column(name = "account_status")
+    @Enumerated(value = STRING)
+    private AccountStatus accountStatus;
+
+    @NotNull
+    @Column(name = "account_id")
+    private UUID accountId;
+
+    @NotNull
+    @Positive
+    @Column(name = "frozen_amount")
+    private BigDecimal frozenAmount;
 }

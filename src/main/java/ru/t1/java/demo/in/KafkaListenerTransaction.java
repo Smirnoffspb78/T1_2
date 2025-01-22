@@ -1,26 +1,34 @@
 package ru.t1.java.demo.in;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-import ru.t1.java.demo.dto.request.TransactionDtoRequest;
+import org.springframework.validation.annotation.Validated;
+import ru.t1.java.demo.config.property.TransactionProperty;
+import ru.t1.java.demo.dto.response.TransactionDtoAccept;
+import ru.t1.java.demo.dto.response.TransactionDtoResult;
+import ru.t1.java.demo.out.KafkaProducerService;
 import ru.t1.java.demo.service.TransactionService;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
+@Validated
 public class KafkaListenerTransaction {
 
     private final TransactionService transactionService;
+    private final TransactionProperty transactionProperty;
 
-    @KafkaListener(topics = "${kafka.message.transactionTopic}", groupId = "${kafka.config.consumer.transaction.groupIdTransaction}",
+    private final KafkaProducerService kafkaProducerService;
+
+    @KafkaListener(topics = "${kafka.message.transactionAcceptTopic}", groupId = "${kafka.config.consumer.transaction.groupIdTransaction}",
             containerFactory = "listenerFactoryTransaction")
-    public void listenTransaction(@Payload TransactionDtoRequest transactionDtoRequest, Acknowledgment acknowledgment) {
-        log.info("Received message: {}", transactionDtoRequest);
-        transactionService.saveTransaction(transactionDtoRequest);
+    public void listenTransaction(@Valid @Payload TransactionDtoAccept transactionDtoaccept, Acknowledgment acknowledgment) {
+        TransactionDtoResult transactionDtoAcceptResponse = transactionService.updateStatusAndSaveTransaction(transactionDtoaccept);
         acknowledgment.acknowledge();
+        kafkaProducerService.sendMessage(transactionProperty.transactionResultTopic(), "contentType",
+                transactionProperty.transactionResultTopic(), transactionDtoAcceptResponse, transactionProperty.keyTransaction());
     }
 }

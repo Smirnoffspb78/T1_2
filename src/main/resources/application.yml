@@ -6,9 +6,6 @@ spring:
     username: "postgres"
     password: "0000"
     driverClassName: org.postgresql.Driver
-  liquibase:
-    enabled: true
-    change-log: db/changelog/db.changelog-master.xml
   jpa:
     hibernate:
       ddl-auto: validate
@@ -49,17 +46,10 @@ kafka:
       transactionTimeout: 10000
       deliveryTimeout: 15000
     consumer:
-      account:
-        bootstrapServer: ${kafka.config.bootstrapServer}
-        groupIdAccount: accountGroup
-        accountPath: ru.t1.java.demo.dto.request.AccountDtoRequest
-        offsetReset: earliest
-        autoCommit: false
-        isolation: read_committed
       transaction:
         bootstrapServer: ${kafka.config.bootstrapServer}
         groupIdTransaction: transactionGroup
-        transactionPath: ru.t1.java.demo.dto.request.TransactionDtoRequest
+        transactionPath: ru.t1.java.demo.dto.response.TransactionDtoAccept
         offsetReset: earliest
         autoCommit: false
         isolation: read_committed
@@ -69,6 +59,17 @@ kafka:
     logErrorTopic: ${kafka.message.metricTopic}
     accountTopic: t1_demo_accounts
     transactionTopic: t1_demo_transactions
+    transactionAcceptTopic: t1_demo_transaction_accept
+    transactionResultTopic: t1_demo_transaction_result
     metricHeader: METRICS
     logErrorHeader: DATA_SOURCE
+    transactionsHeader: TRANSACTION
+    keyTransaction: TRANSACTION
+    keyError: ERROR
+    keyMetric: METRIC
+    countTransaction: 3
+    intervalTime: 30
 
+
+server:
+  port: 8081

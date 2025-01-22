@@ -17,10 +17,9 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.util.backoff.BackOff;
 import org.springframework.util.backoff.FixedBackOff;
-import ru.t1.java.demo.config.property.ConsumerPropertyAccount;
+
 import ru.t1.java.demo.config.property.ConsumerPropertyTransaction;
-import ru.t1.java.demo.dto.request.AccountDtoRequest;
-import ru.t1.java.demo.dto.request.TransactionDtoRequest;
+import ru.t1.java.demo.dto.response.TransactionDtoAccept;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,11 +30,11 @@ import java.util.Map;
 @Slf4j
 public class KafkaConsumerConfig {
 
-    private final ConsumerPropertyAccount consumerPropertyAccount;
+   /* private final ConsumerPropertyAccount consumerPropertyAccount;*/
 
     private final ConsumerPropertyTransaction consumerPropertyTransaction;
 
-    @Bean
+    /*@Bean
     public ConsumerFactory<String, AccountDtoRequest> consumerFactoryAccount() {
         StringDeserializer keyDeserializer = new StringDeserializer();
         JsonDeserializer<AccountDtoRequest> jsonDeserializer = new JsonDeserializer<>(AccountDtoRequest.class);
@@ -53,13 +52,13 @@ public class KafkaConsumerConfig {
         configFactory.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, consumerPropertyAccount.isolation());
 
         return new DefaultKafkaConsumerFactory<>(configFactory, keyDeserializer, errorHandlingDeserializer);
-    }
+    }*/
 
     @Bean
-    public ConsumerFactory<String, TransactionDtoRequest> consumerFactoryTransaction() {
+    public ConsumerFactory<String, TransactionDtoAccept> consumerFactoryTransaction() {
         StringDeserializer keyDeserializer = new StringDeserializer();
-        JsonDeserializer<TransactionDtoRequest> jsonDeserializer = new JsonDeserializer<>(TransactionDtoRequest.class);
-        ErrorHandlingDeserializer<TransactionDtoRequest> errorHandlingDeserializer =
+        JsonDeserializer<TransactionDtoAccept> jsonDeserializer = new JsonDeserializer<>(TransactionDtoAccept.class);
+        ErrorHandlingDeserializer<TransactionDtoAccept> errorHandlingDeserializer =
                 new ErrorHandlingDeserializer<>(jsonDeserializer);
 
         final Map<String, Object> configFactory = new HashMap<>();
@@ -71,22 +70,23 @@ public class KafkaConsumerConfig {
         configFactory.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, consumerPropertyTransaction.offsetReset());
         configFactory.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, consumerPropertyTransaction.autoCommit());
         configFactory.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, consumerPropertyTransaction.isolation());
+        configFactory.put(JsonDeserializer.TRUSTED_PACKAGES, "java.util,java.lang,ru.t1.java.demo.dto.*");
 
         return new DefaultKafkaConsumerFactory<>(configFactory, keyDeserializer, errorHandlingDeserializer);
     }
 
-    @Bean("listenerFactoryAccount")
+   /* @Bean("listenerFactoryAccount")
     public ConcurrentKafkaListenerContainerFactory<String, AccountDtoRequest> kafkaListenerFactoryAccount() {
         final ConcurrentKafkaListenerContainerFactory<String, AccountDtoRequest> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactoryAccount());
         factory.setCommonErrorHandler(errorHandler());
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         return factory;
-    }
+    }*/
 
     @Bean("listenerFactoryTransaction")
-    public ConcurrentKafkaListenerContainerFactory<String, TransactionDtoRequest> kafkaListenerFactoryTransaction() {
-        final ConcurrentKafkaListenerContainerFactory<String, TransactionDtoRequest> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, TransactionDtoAccept> kafkaListenerFactoryTransaction() {
+        final ConcurrentKafkaListenerContainerFactory<String, TransactionDtoAccept> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactoryTransaction());
         factory.setCommonErrorHandler(errorHandler());
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);

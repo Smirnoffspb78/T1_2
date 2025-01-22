@@ -12,7 +12,6 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 import ru.t1.java.demo.config.property.KafkaProducerProperties;
 
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Configuration
@@ -28,7 +27,7 @@ public class KafkaProducerConfig {
         configFactory.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configFactory.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         configFactory.put(ProducerConfig.ACKS_CONFIG, kafkaProducerProperties.acks());
-        configFactory.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "metric-" + UUID.randomUUID());
+        configFactory.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "metric-");
         configFactory.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, kafkaProducerProperties.timeout());
         configFactory.put(ProducerConfig.RETRIES_CONFIG, kafkaProducerProperties.retry());
         configFactory.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, kafkaProducerProperties.idempotence());
