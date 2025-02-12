@@ -2,13 +2,25 @@ spring:
   application:
     name: t1-java-demo
   datasource:
-    url: "jdbc:postgresql://localhost:5432/t1_demo"
+    url: "jdbc:postgresql://localhost:5433/t1_demo"
     username: "postgres"
     password: "0000"
     driverClassName: org.postgresql.Driver
-  liquibase:
-    enabled: true
-    change-log: db/changelog/db.changelog-master.xml
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+    zookeeper:
+      # Настройка для подключения к Zookeeper
+      connect-string: localhost:2181
+      session-timeout: 10000
+      connection-timeout: 10000
+      max-retries: 3
+      retry-timeout: 3000
 
 logging:
   level:
@@ -17,3 +29,47 @@ logging:
 
 t1:
   scan-path: ru.t1.java.demo
+
+metric:
+  validTime: 1
+
+kafka:
+  config:
+    bootstrapServer: "localhost:29092,localhost:39092,localhost:49092"
+    producer:
+      bootstrapServer: ${kafka.config.bootstrapServer}
+      acks: "all"
+      retry: 3
+      timeout: 5000
+      idempotence: true
+      lingerTimeout: 500
+      transactionTimeout: 10000
+      deliveryTimeout: 15000
+    consumer:
+      transaction:
+        bootstrapServer: ${kafka.config.bootstrapServer}
+        groupIdTransaction: transactionGroup
+        transactionPath: ru.t1.java.demo.dto.response.TransactionDtoAccept
+        offsetReset: earliest
+        autoCommit: false
+        isolation: read_committed
+  message:
+    timeOut: 3
+    metricTopic: t1_demo_metrics
+    logErrorTopic: ${kafka.message.metricTopic}
+    accountTopic: t1_demo_accounts
+    transactionTopic: t1_demo_transactions
+    transactionAcceptTopic: t1_demo_transaction_accept
+    transactionResultTopic: t1_demo_transaction_result
+    metricHeader: METRICS
+    logErrorHeader: DATA_SOURCE
+    transactionsHeader: TRANSACTION
+    keyTransaction: TRANSACTION
+    keyError: ERROR
+    keyMetric: METRIC
+    countTransaction: 3
+    intervalTime: 30
+
+
+server:
+  port: 8081
